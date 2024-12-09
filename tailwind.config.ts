@@ -8,9 +8,15 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+      backgroundImage: {
+        'gradient-custom': `
+          linear-gradient(
+            to bottom right,
+            rgba(255, 122, 89, 0.8),
+            rgba(255, 170, 145, 0.7),
+            rgba(183, 102, 223, 0.9)
+          )
+        `,
       },
     },
   },

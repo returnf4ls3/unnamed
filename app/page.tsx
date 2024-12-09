@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { FaUser } from "react-icons/fa";
+import Image from "next/image";
 
 interface GameRecord {
   id: string;
@@ -10,7 +12,10 @@ interface GameRecord {
   player1Score: number;
   player2Score: number;
   gameTime: Date;
-  winner: string;
+  winner?: string;
+  isCompleted: boolean;
+  player1Image?: string;
+  player2Image?: string;
 }
 
 const Home = () => {
@@ -44,14 +49,55 @@ const Home = () => {
                   key={record.id}
                   className="flex flex-col p-4 bg-white rounded-md shadow-sm"
                 >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
+                        {record.player1Image ? (
+                          <Image
+                            src={record.player1Image}
+                            alt={`${record.player1} profile`}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <FaUser className="w-full h-full text-gray-400" />
+                        )}
+                      </div>
+                      <span className="font-medium">{record.player1}</span>
+                    </div>
+
+                    <span className="font-bold text-gray-600">VS</span>
+
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
+                        {record.player2Image ? (
+                          <Image
+                            src={record.player2Image}
+                            alt={`${record.player2} profile`}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <FaUser className="w-full h-full text-gray-400" />
+                        )}
+                      </div>
+                      <span className="font-medium">{record.player2}</span>
+                    </div>
+                  </div>
+
                   <span className="text-sm text-gray-500">
                     {new Date(record.gameTime).toLocaleString()}
                   </span>
-                  <span className="font-medium">
-                    {record.player1} ({record.player1Score}) vs {record.player2} (
-                    {record.player2Score})
+
+                  <span className="font-medium text-lg">
+                    {record.player1Score} : {record.player2Score}
                   </span>
-                  <span>승자: {record.winner}</span>
+
+                  <span className="text-sm">
+                    승자: {record.winner || "데이터 없음"}
+                  </span>
+
+                  <span className="text-sm text-gray-600">
+                    경기 상태: {record.isCompleted ? "완료됨" : "진행 중"}
+                  </span>
                 </li>
               ))}
             </ul>

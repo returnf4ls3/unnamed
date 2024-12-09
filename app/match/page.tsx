@@ -7,19 +7,25 @@ import Image from "next/image";
 
 interface GameRecord {
   id: string;
+  gameId: number;
   player1: string;
   player2: string;
   player1Score?: number;
   player2Score?: number;
+  player1Votes?: number;
+  player2Votes?: number;
+  isCompleted?: boolean;
   gameTime: string;
-  winner: string;
+  winner?: string;
   player1Image?: string;
   player2Image?: string;
-}
+};
 
 const MatchManage = () => {
   const [matches, setMatches] = useState<GameRecord[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editMatch, setEditMatch] = useState<GameRecord | null>(null);
   const [newMatch, setNewMatch] = useState({
     player1: "",
     player2: "",
@@ -43,7 +49,7 @@ const MatchManage = () => {
 
   const fetchProfileImages = async () => {
     try {
-      const response = await axios.get("/api/image"); // 선수 프로필 이미지 리스트 요청
+      const response = await axios.get("/api/image");
       setProfileImages(response.data.images || []);
     } catch (error) {
       console.error("Error fetching profile images:", error);
@@ -61,6 +67,44 @@ const MatchManage = () => {
       }
     } catch (error) {
       console.error("Error adding match:", error);
+    }
+  };
+
+  const handleEditMatch = async () => {
+    if (!editMatch) return;
+
+    try {
+      const updatedData = {
+        player1: editMatch.player1,
+        player2: editMatch.player2,
+        gameTime: editMatch.gameTime,
+        winner: editMatch.winner,
+        isCompleted: editMatch.isCompleted,
+        ...(editMatch.player1Score || editMatch.player1Score === 0) && { player1Score: editMatch.player1Score },
+        ...(editMatch.player2Score || editMatch.player2Score === 0) && { player2Score: editMatch.player2Score },
+        ...(editMatch.player1Votes || editMatch.player1Votes === 0) && { player1Votes: editMatch.player1Votes },
+        ...(editMatch.player2Votes || editMatch.player2Votes === 0) && { player2Votes: editMatch.player2Votes },
+      };
+  
+      const response = await axios.put(`/api/match/${editMatch.gameId}`, updatedData);
+      if (response.data.success) {
+        fetchMatches();
+        setIsModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error adding match:", error);
+    }
+
+    try {
+      const response = await axios.put(`/api/match/${editMatch.gameId}`, {
+        ...editMatch,
+      });
+      if (response.data.success) {
+        fetchMatches();
+        setIsEditModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error editing match:", error);
     }
   };
 
@@ -142,11 +186,20 @@ const MatchManage = () => {
                     {new Date(match.gameTime).toLocaleString()}
                   </p>
                   <p className="text-sm">
-                    <strong>승자:</strong> {match.winner}
+                    <strong>승자:</strong> {match.winner || "미정"}
                   </p>
                   <p className="text-sm">
                     점수: {match.player1Score || 0} - {match.player2Score || 0}
                   </p>
+                  <button
+                    onClick={() => {
+                      setEditMatch(match);
+                      setIsEditModalOpen(true);
+                    }}
+                    className="ml-4 px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                  >
+                    수정
+                  </button>
                 </div>
               </div>
             ))
@@ -265,6 +318,123 @@ const MatchManage = () => {
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
               >
                 추가
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isEditModalOpen && editMatch && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md p-6 bg-white rounded-lg">
+            <h2 className="text-lg font-bold mb-4">경기 수정</h2>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="선수 1 이름"
+                value={editMatch.player1}
+                onChange={(e) =>
+                  setEditMatch((prev) =>
+                    prev ? { ...prev, player1: e.target.value } : null
+                  )
+                }
+                className="w-full px-4 py-2 border rounded-md"
+              />
+              <input
+                type="text"
+                placeholder="선수 2 이름"
+                value={editMatch.player2}
+                onChange={(e) =>
+                  setEditMatch((prev) =>
+                    prev ? { ...prev, player2: e.target.value } : null
+                  )
+                }
+                className="w-full px-4 py-2 border rounded-md"
+              />
+              <input
+                type="number"
+                placeholder="선수 1 점수"
+                value={editMatch.player1Score || ""}
+                onChange={(e) =>
+                  setEditMatch((prev) =>
+                    prev ? { ...prev, player1Score: +e.target.value } : null
+                  )
+                }
+                className="w-full px-4 py-2 border rounded-md"
+              />
+              <input
+                type="number"
+                placeholder="선수 2 점수"
+                value={editMatch.player2Score || ""}
+                onChange={(e) =>
+                  setEditMatch((prev) =>
+                    prev ? { ...prev, player2Score: +e.target.value } : null
+                  )
+                }
+                className="w-full px-4 py-2 border rounded-md"
+              />
+              <input
+                type="number"
+                placeholder="선수 1 투표"
+                value={editMatch.player1Votes || ""}
+                onChange={(e) =>
+                  setEditMatch((prev) =>
+                    prev ? { ...prev, player1Votes: +e.target.value } : null
+                  )
+                }
+                className="w-full px-4 py-2 border rounded-md"
+              />
+              <input
+                type="number"
+                placeholder="선수 2 투표"
+                value={editMatch.player2Votes || ""}
+                onChange={(e) =>
+                  setEditMatch((prev) =>
+                    prev ? { ...prev, player2Votes: +e.target.value } : null
+                  )
+                }
+                className="w-full px-4 py-2 border rounded-md"
+              />
+              <select
+                value={editMatch.winner || ""}
+                onChange={(e) =>
+                  setEditMatch((prev) =>
+                    prev ? { ...prev, winner: e.target.value } : null
+                  )
+                }
+                className="w-full px-4 py-2 border rounded-md"
+              >
+                <option value="">승자 선택</option>
+                <option value={editMatch.player1}>{editMatch.player1}</option>
+                <option value={editMatch.player2}>{editMatch.player2}</option>
+              </select>
+              <select
+                value={editMatch.isCompleted ? "completed" : "inProgress"}
+                onChange={(e) =>
+                  setEditMatch((prev) =>
+                    prev
+                      ? { ...prev, isCompleted: e.target.value === "completed" }
+                      : null
+                  )
+                }
+                className="w-full px-4 py-2 border rounded-md"
+              >
+                <option value="inProgress">진행 중</option>
+                <option value="completed">완료</option>
+              </select>
+            </div>
+            <div className="flex justify-end mt-6 space-x-4">
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleEditMatch}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              >
+                수정
               </button>
             </div>
           </div>

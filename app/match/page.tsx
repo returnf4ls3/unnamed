@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaUser } from "react-icons/fa";
 import Image from "next/image";
+import Button from "../components/Button";
 
 interface GameRecord {
   id: string;
@@ -108,6 +109,18 @@ const MatchManage = () => {
     }
   };
 
+  const handleDeleteMatch = async (gameId: number) => {
+    try {
+      const response = await axios.delete(`/api/match/${gameId}`);
+      if (response.data.success) {
+        setMatches((prev) => prev.filter((match) => match.gameId !== gameId));
+        setIsEditModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error deleting match:", error);
+    }
+  };
+
   useEffect(() => {
     fetchMatches();
     fetchProfileImages();
@@ -135,12 +148,7 @@ const MatchManage = () => {
       <div className="w-full max-w-4xl p-6 bg-white bg-opacity-30 backdrop-blur-md rounded-lg shadow-lg">
         <h1 className="text-2xl font-bold text-center mb-6">경기 목록 관리</h1>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="mb-6 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
-          경기 추가
-        </button>
+        <Button label="경기 추가" onClick={() => setIsModalOpen(true)} size="medium" className="mb-6" />
 
         <div className="mt-4 space-y-4">
           {matches.length > 0 ? (
@@ -191,15 +199,15 @@ const MatchManage = () => {
                   <p className="text-sm">
                     점수: {match.player1Score || 0} - {match.player2Score || 0}
                   </p>
-                  <button
+                  <Button 
+                    label="수정" 
                     onClick={() => {
                       setEditMatch(match);
                       setIsEditModalOpen(true);
                     }}
-                    className="ml-4 px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-                  >
-                    수정
-                  </button>
+                    size="small"
+                    className="ml-4 bg-yellow-500 hover:bg-yellow-600"
+                  />
                 </div>
               </div>
             ))
@@ -307,18 +315,8 @@ const MatchManage = () => {
               </select>
             </div>
             <div className="flex justify-end mt-6 space-x-4">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleAddMatch}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              >
-                추가
-              </button>
+              <Button label="취소" onClick={() => setIsModalOpen(false)} variant="secondary" size="medium" />
+              <Button label="추가" onClick={handleAddMatch} size="medium" />
             </div>
           </div>
         </div>
@@ -424,18 +422,9 @@ const MatchManage = () => {
               </select>
             </div>
             <div className="flex justify-end mt-6 space-x-4">
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleEditMatch}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              >
-                수정
-              </button>
+              <Button label="취소" onClick={() => setIsEditModalOpen(false)} variant="secondary" />
+              <Button label="수정" onClick={handleEditMatch} />
+              <Button label="삭제" onClick={() => handleDeleteMatch(editMatch.gameId)} variant="danger" />
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ interface ButtonProps {
   type?: "button" | "submit" | "reset";
   variant?: "primary" | "secondary" | "danger";
   size?: "small" | "medium" | "large";
+  className?: string;
 }
 
 const Button = ({
@@ -16,8 +17,8 @@ const Button = ({
   type = "button",
   variant = "primary",
   size = "medium",
+  className,
 }: ButtonProps) => {
-  // Define styles for variants and sizes
   const variantStyles = {
     primary: "bg-blue-500 text-white hover:bg-blue-600",
     secondary: "bg-gray-500 text-white hover:bg-gray-600",
@@ -35,9 +36,9 @@ const Button = ({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+      className={`rounded-lg font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
         variantStyles[variant]
-      } ${sizeStyles[size]}`}
+      } ${sizeStyles[size]} ${className}`}
     >
       {label}
     </button>

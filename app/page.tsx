@@ -16,6 +16,8 @@ interface GameRecord {
   isCompleted: boolean;
   player1Image?: string;
   player2Image?: string;
+  player1Votes?: number;
+  player2Votes?: number;
 }
 
 const Home = () => {
@@ -56,6 +58,8 @@ const Home = () => {
                           <Image
                             src={record.player1Image}
                             alt={`${record.player1} profile`}
+                            width={100}
+                            height={100}
                             className="w-full h-full object-cover"
                           />
                         ) : (
@@ -73,6 +77,8 @@ const Home = () => {
                           <Image
                             src={record.player2Image}
                             alt={`${record.player2} profile`}
+                            width={100}
+                            height={100}
                             className="w-full h-full object-cover"
                           />
                         ) : (
@@ -98,6 +104,16 @@ const Home = () => {
                   <span className="text-sm text-gray-600">
                     경기 상태: {record.isCompleted ? "완료됨" : "진행 중"}
                   </span>
+
+                  <div className="text-sm text-gray-700 mt-2">
+                    <span>
+                      <strong>{record.player1}</strong>: {record.player1Votes || 0} votes
+                    </span>
+                    <span className="mx-2">|</span>
+                    <span>
+                      <strong>{record.player2}</strong>: {record.player2Votes || 0} votes
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
